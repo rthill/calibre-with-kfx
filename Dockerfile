@@ -1,6 +1,5 @@
-FROM python:3.13-slim-bookworm
+FROM ghcr.io/linuxserver/calibre:latest
 
-LABEL name="calibre-with-kfx" maintainer="yshalsager <contact@yshalsager.com>"
 LABEL org.opencontainers.image.description "An image for running Calibre with KFX support to allow conversion of KFX files to other formats."
 
 # Install prerequisites
@@ -33,18 +32,6 @@ RUN dpkg --add-architecture i386 \
     && apt install -y --no-install-recommends winbind winehq-${WINE_BRANCH} \
     && rm -rf /var/lib/apt/lists/*
 
-# Install calibre
-RUN curl -s https://download.calibre-ebook.com/linux-installer.sh | sh /dev/stdin
-
-# non-root user
-ARG USERNAME=calibre
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
-RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    && mkdir /app && chown -R $USERNAME:$USERNAME /app
-USER calibre
-
 # Calibre plugins and Kindle support
 # KFX Output 272407
 # KFX Input 291290
@@ -57,8 +44,3 @@ RUN cd /home/$USERNAME/ && curl -s -O https://d2bzeorukaqrvt.cloudfront.net/Kind
     && curl -s -O https://plugins.calibre-ebook.com/291290.zip \
     && calibre-customize -a 291290.zip \
     && rm *.zip
-
-COPY entrypoint.sh /sbin/entrypoint.sh
-ENTRYPOINT ["/sbin/entrypoint.sh"]
-
-WORKDIR /app
