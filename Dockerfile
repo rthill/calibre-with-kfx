@@ -30,13 +30,14 @@ RUN dpkg --add-architecture i386 \
     && curl -L -o /etc/apt/sources.list.d/winehq-bookworm.sources https://dl.winehq.org/wine-builds/debian/dists/bookworm/winehq-bookworm.sources \
     && apt update \
     && apt install -y --no-install-recommends winbind winehq-${WINE_BRANCH} \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && chown 1000:1000 -R /config
 
 # Calibre plugins and Kindle support
 # KFX Output 272407
 # KFX Input 291290
-ARG USERNAME=abc
-USER abc
+ARG USERNAME=kasm-user
+USER kasm-user
 COPY --chown=$USERNAME:$USERNAME kp3.reg /home/$USERNAME/kp3.reg
 RUN cd /home/$USERNAME/ && curl -s -O https://d2bzeorukaqrvt.cloudfront.net/KindlePreviewerInstaller.exe \
     && DISPLAY=:0 WINEARCH=win64 WINEDEBUG=-all wine KindlePreviewerInstaller.exe /S \
