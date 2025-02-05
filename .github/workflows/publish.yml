@@ -23,29 +23,12 @@ jobs:
         with:
           token: ${{ secrets.PAT }}
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Get version from commit message
-        id: get-version
-        run: |
-          version=$(git log -1 --pretty=%B | grep -o '[0-9]\{8\}-[0-9]\{4\}')
-          echo "version=$version" >> $GITHUB_OUTPUT
-
-      - name: Set image tag and description
-        id: tag
-        run: |
-          echo "description=Using $(jq -r 'to_entries | map("\(.key): \(.value)") | join(" - ")' versions.json)" >> $GITHUB_OUTPUT
+          password: ${{ secrets.GH_PAT }}
 
       - name: Build Docker images
         uses: docker/build-push-action@v6
@@ -55,33 +38,7 @@ jobs:
           load: true
           tags: |
             ${{ github.repository }}:latest
-            ${{ github.repository }}:${{ steps.get-version.outputs.version }}
             ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ steps.get-version.outputs.version }}
-          labels: |
-            org.opencontainers.image.description=${{ steps.tag.outputs.description }}
-
-      - name: Test
-        run: |
-          curl -s -L -O "https://github.com/IDPF/epub3-samples/releases/download/20170606/trees.epub"
-          echo "Running test script..."
-          sudo chown 1000:1000 .
-          docker run --rm -v "$(pwd):/app:rw" --entrypoint="bash" ${{ github.repository }}:latest -c "./test.sh trees.epub"
-
-      - name: Create and push tag
-        if: success()
-        run: |
-          git tag ${{ steps.get-version.outputs.version }}
-          git push origin ${{ steps.get-version.outputs.version }}
-
-      - name: Create Release
-        if: success()
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.get-version.outputs.version }}
-          name: ${{ steps.get-version.outputs.version }}
-          body: |
-            [ghcr.io/${{ github.repository }}:${{ steps.get-version.outputs.version }}](https://ghcr.io/${{ github.repository }}) Built using: $(jq -r 'to_entries | map("\n- \(.key): \(.value)") | .[]' versions.json)
 
       - name: Push Docker images
         if: success()
@@ -92,8 +49,4 @@ jobs:
           push: true
           tags: |
             ${{ github.repository }}:latest
-            ${{ github.repository }}:${{ steps.get-version.outputs.version }}
             ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ steps.get-version.outputs.version }}
-          labels: |
-            org.opencontainers.image.description=${{ steps.tag.outputs.description }}
