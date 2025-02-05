@@ -35,8 +35,8 @@ RUN dpkg --add-architecture i386 \
 # Calibre plugins and Kindle support
 # KFX Output 272407
 # KFX Input 291290
-ARG USERNAME=kasm-user
-USER kasm-user
+ARG USERNAME=abc
+USER abc
 COPY --chown=$USERNAME:$USERNAME kp3.reg /home/$USERNAME/kp3.reg
 RUN cd /home/$USERNAME/ && curl -s -O https://d2bzeorukaqrvt.cloudfront.net/KindlePreviewerInstaller.exe \
     && DISPLAY=:0 WINEARCH=win64 WINEDEBUG=-all wine KindlePreviewerInstaller.exe /S \
