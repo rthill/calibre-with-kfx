@@ -47,3 +47,5 @@ RUN cd /config && curl -s -O https://d2bzeorukaqrvt.cloudfront.net/KindlePreview
     && curl -s -O https://plugins.calibre-ebook.com/291290.zip \
     && calibre-customize -a 291290.zip \
     && rm *.zip
+
+USER root
