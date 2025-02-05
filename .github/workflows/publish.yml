@@ -35,7 +35,6 @@ jobs:
           file: ./Dockerfile
           load: true
           tags: |
-            ${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:latest
 
       - name: Push Docker images
@@ -46,5 +45,4 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:latest
